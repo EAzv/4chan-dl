@@ -1,0 +1,108 @@
+#!/usr/bin/env python
+import sys, urllib, urllib2, getopt, os, urlparse
+from BeautifulSoup import BeautifulSoup
+
+verbosity = 0
+folder = ''
+section = ''
+
+def usage():
+    print """
+Usage: 4chan-dl <options>
+
+    Options:
+        -s --section=section    4Chan section
+        -c --code=code          4chan thread code
+        -f --folder=folder      Download folder, if not exist I create it
+        -v --verbose            Verbose output
+        -h --help               Display this help
+
+    Example usage:
+        -Download image from /g/ in current folder:
+            4chan-dl -s /g/ -c 41908404
+        -Download image from g (or /g/ is the same) in folder and verbosity on:
+            4chan-dl -s g -c 41908404 -f /home/fdisotto/4chan -v
+    """
+
+def download(code):
+    global verbosity
+    global folder
+    global section
+
+    if verbosity == 1:
+        print 'Verbosity ON'
+
+    url = urlparse.urljoin('https://boards.4chan.org/', section + '/thread/' + code)
+
+    resCode = urllib.urlopen(url).getcode()
+    if resCode != 200:
+        print 'Code is not valid'
+        sys.exit(0)
+
+    if verbosity == 1:
+        print 'Url OK'
+
+    page = BeautifulSoup(urllib2.urlopen(url))
+
+    imgs = page.findAll('img')
+
+    if not os.path.isdir(folder): os.makedirs(folder)
+    if verbosity == 1:
+        print 'Create folder ' + folder
+
+    l = len(imgs)
+    if verbosity == 1:
+        print 'Starting download for ' + `l` + ' images'
+
+    i = 0
+    while i < l:
+        link = 'https://' + imgs[i]['src'][2:]
+        filename = link.split('/')[-1]
+
+        resource = urllib.urlopen(link)
+        output = open(os.path.join(folder, filename), "wb")
+        output.write(resource.read())
+        output.close()
+
+        if verbosity == 1:
+            print 'Image ' + str(i + 1) + ' downloaded'
+
+        i += 1
+
+    print 'Finished'
+
+def main(argv):
+    try:
+        opts, args = getopt.getopt(argv,"hs:f:c:v",["help", "section=", "folder=", "code=", "verbose"])
+    except getopt.GetoptError:
+        usage()
+        sys.exit(0)
+
+    dw = 0
+    for opt, arg in opts:
+        if opt in ("-h", "--help"):
+            usage()
+            sys.exit(0)
+        elif opt in ("-v", "--verbose"):
+            global verbosity
+            verbosity = 1
+        elif opt in ("-c", "--code"):
+            dw = 1
+            c = arg
+        elif opt in ("-f", "--folder"):
+            global folder
+            folder = arg
+        elif opt in ("-s", "--section"):
+            global section
+            section = arg
+
+    if dw == 1:
+        download(c)
+    else:
+        usage()
+
+try:
+    if __name__ == "__main__":
+        main(sys.argv[1:])
+except KeyboardInterrupt:
+    sys.exit('Interrupted')
