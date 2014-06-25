@@ -1,7 +1,7 @@
 Usage
 ========
 
-Usage: 4chan-dl <options>
+    Usage: 4chan-dl <options>
 
     Options:
         -s --section=section    4Chan section
