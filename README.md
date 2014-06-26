@@ -1,3 +1,8 @@
+Dependencies
+========
+* [Python 2.7+](https://www.python.org/)
+* [Beautiful Soup](http://www.crummy.com/software/BeautifulSoup/)
+
 Usage
 ========
 
