@@ -44,7 +44,7 @@ def download(code):
 
     page = BeautifulSoup(urllib2.urlopen(url))
 
-    imgs = page.findAll('img')
+    imgs = page.findAll('a',attrs={'class':'fileThumb'})
 
     if not os.path.isdir(folder): os.makedirs(folder)
     if verbosity == 1:
@@ -56,7 +56,7 @@ def download(code):
 
     i = 0
     while i < l:
-        link = 'https://' + imgs[i]['src'][2:]
+        link = 'https://' + imgs[i]['href'][2:]
         filename = link.split('/')[-1]
 
         resource = urllib.urlopen(link)
